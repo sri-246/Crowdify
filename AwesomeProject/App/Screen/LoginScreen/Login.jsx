@@ -2,9 +2,31 @@ import { StyleSheet, View, Text, Image, TouchableOpacity } from 'react-native'
 import React from 'react'
 import Colors from '../../Utils/Colors'
 import { useFonts } from "expo-font";
-import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen'; // Importing responsive screen functions
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import { useOAuth } from "@clerk/clerk-expo";
+import { useWarmUpBrowser } from "../../hooks/useWarmUpBrowser";
+import * as WebBrowser from "expo-web-browser";
+
+WebBrowser.maybeCompleteAuthSession();
 
 export default function Login() {
+  useWarmUpBrowser();
+  const { startOAuthFlow } = useOAuth({ strategy: "oauth_google" });
+ 
+  const onPress = React.useCallback(async () => {
+    try {
+      const { createdSessionId, signIn, signUp, setActive } =
+        await startOAuthFlow();
+ 
+      if (createdSessionId) {
+        setActive({ session: createdSessionId });
+      } else {
+        // Use signIn or signUp for next steps such as MFA
+      }
+    } catch (err) {
+      console.error("OAuth error", err);
+    }
+  }, []);
   const [fontsLoaded] = useFonts({
     'mr': require('../../Utils/MarckScriptRegular.ttf'),
     'qs': require('../../Utils/Quicksand-VariableFont_wght.ttf'),
@@ -23,7 +45,7 @@ export default function Login() {
       <View style={styles.subcon}>
         <Text style={styles.hometext}>Welcome to Crowdify</Text>
         <Text style={styles.hometext2}>STAY CONNECTED WITH PEOPLE</Text>
-        <TouchableOpacity style={styles.button} onPress={() => console.log("button clicked")}>
+        <TouchableOpacity style={styles.button} onPress={onPress}>
           <Text style={{ textAlign: "center", color: Colors.dg, fontSize: wp('4.5%'), fontFamily: 'mr' }}>Let's Get Started</Text>
         </TouchableOpacity>
       </View>
