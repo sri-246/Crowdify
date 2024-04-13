@@ -30,9 +30,15 @@ export default function Login() {
   const [fontsLoaded] = useFonts({
     'mr': require('../../Utils/MarckScriptRegular.ttf'),
     'qs': require('../../Utils/Quicksand-VariableFont_wght.ttf'),
+    'caveat': require('../../Utils/Caveat-VariableFont_wght.ttf'),
+    'as': require('../../Utils/AlbertSans.ttf'),
   });
   if (!fontsLoaded) {
-    return <Text>Loading...</Text>;
+    return <Image
+    source={require('./../../../assets/images/HomeLogoIcon.png')}
+    style={{alignSelf:'center',width:55, 
+    height:55}}
+  />;
   }
   return (
     <>
@@ -43,10 +49,13 @@ export default function Login() {
         />
       </View>
       <View style={styles.subcon}>
-        <Text style={styles.hometext}>Welcome to Crowdify</Text>
-        <Text style={styles.hometext2}>STAY CONNECTED WITH PEOPLE</Text>
+        <Text style={styles.hometext}>welcome to <Text style={{fontWeight:'900'}}>CROWDIFY</Text></Text>
+        <Text style={styles.hometext2}><Text style={{fontWeight:'900'}}>S</Text>tay
+        <Text style={{fontWeight:'900'}}> C</Text>onnected 
+        <Text style={{fontWeight:'900'}}> W</Text>ith 
+        <Text style={{fontWeight:'900'}}> P</Text>eople</Text>
         <TouchableOpacity style={styles.button} onPress={onPress}>
-          <Text style={{ textAlign: "center", color: Colors.dg, fontSize: wp('4.5%'), fontFamily: 'mr' }}>Let's Get Started</Text>
+          <Text style={{ textAlign: "center", color: Colors.bg, fontSize: wp('4.5%'), fontFamily: 'as' }}>SignIn or SignUp</Text>
         </TouchableOpacity>
       </View>
     </>
@@ -58,31 +67,34 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   homelogo: {
-    width: wp('60%'), 
-    height: hp('20%'),
+    width: wp('80%'), 
+    height: hp('25%'),
   },
   hometext2: {
-    fontSize: wp('5%'),
-    fontFamily: 'qs',
+    fontSize: wp('6%'),
+    fontFamily: 'as',
     color:'white',
-    alignSelf: 'center',
+    alignSelf: 'baseline',
     paddingLeft: wp('5%'),
     paddingRight: wp('5%'),
+    maxWidth:wp('50%')
   },
   hometext: {
-    alignSelf: 'center',
+    alignSelf:'baseline',
     paddingBottom: wp('5%'),
     paddingLeft: wp('5%'),
     paddingRight: wp('5%'),
-    fontSize: wp('8%'),
-    fontFamily: 'mr',
-    color: 'white', 
+    fontSize: wp('6%'),
+    fontFamily:'as',
+    color: 'white',
   },
   subcon: {
-    backgroundColor: Colors.dg,
-    alignItems: 'center', 
-    borderRadius: wp('10%'), 
-    paddingTop: hp('10%'), 
+    backgroundColor:Colors.bg,
+    alignItems: 'center',
+    width:wp('80%'),
+    borderRadius:50, 
+    paddingTop: hp('10%'),
+
   },
   button: {
     alignSelf: 'center',
