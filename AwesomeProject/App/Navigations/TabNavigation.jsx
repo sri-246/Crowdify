@@ -15,7 +15,7 @@ const Tab = createBottomTabNavigator();
 export default function TabNavigation() {
   return (
     <Tab.Navigator 
-    screenOptions={{headerShown:false}}
+    screenOptions={{headerShown:false,tabBarActiveTintColor:Colors.bg}}
     >
       <Tab.Screen name='home' component={HomeScreen}
       options={{
@@ -23,7 +23,7 @@ export default function TabNavigation() {
         <Text></Text>
        ),
        tabBarIcon:({color,size})=>(
-        <FontAwesome5 name="home" size={24} style={{color:Colors.bg}} />
+        <FontAwesome5 name="home" size={24} color={color} />
        )
       }
       }/>
@@ -32,7 +32,7 @@ export default function TabNavigation() {
         <Text></Text>
        ),
        tabBarIcon:({color,size})=>(
-        <Ionicons name="chatbubbles-outline" size={24} style={{color:Colors.bg}} />
+        <Ionicons name="chatbubbles-outline" size={24} color={color} />
        )
       }
       }/>
@@ -41,7 +41,7 @@ export default function TabNavigation() {
         <Text></Text>
        ),
        tabBarIcon:({color,size})=>(
-        <AntDesign name="profile" size={24} style={{color:Colors.bg}} />
+        <AntDesign name="profile" size={24} color={color} />
        )
       }
       }/>

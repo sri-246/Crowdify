@@ -15,6 +15,7 @@
     "@react-navigation/native": "^6.1.17",
     "expo": "~50.0.14",
     "expo-font": "^11.10.3",
+    "expo-image-picker": "^14.7.1",
     "expo-secure-store": "^12.8.1",
     "expo-status-bar": "~1.11.1",
     "expo-web-browser": "~12.8.2",
