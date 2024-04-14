@@ -1,7 +1,8 @@
 export default{
     gg:'#59A52C',
-    dg:'#067F38',
-    lg:'#7DD856',
+    db:'#2D388A',
+    lb:'#08A7EB',
     black:'black',
-    bg:'#137DC5'
+    bg:'#137DC5',
+    white:'white',
 }
