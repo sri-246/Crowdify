@@ -1,5 +1,7 @@
-import { View, Text ,Image ,FlatList, TouchableOpacity } from 'react-native'
+import { View, Text ,Image ,FlatList, TouchableOpacity} from 'react-native'
 import React from 'react'
+import {useFonts} from 'expo-font';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {Ionicons} from '@expo/vector-icons'
 import {useUser} from '@clerk/clerk-expo';
 import Colors from '../../Utils/Colors';
@@ -30,7 +32,7 @@ export default function ProfileScreen() {
     }
   ]
   return (
-    <View>
+    <SafeAreaView>
     <View style={{padding:20,paddingTop:30,backgroundColor:Colors.db}}>
       <Text style={{fontSize:30,fontFamily:'outfit-bold',color:Colors.white}}>Profile</Text>
       <View style={{display:'flex',
@@ -60,7 +62,7 @@ export default function ProfileScreen() {
       
       />
     </View>
-    </View>
+    </SafeAreaView>
   )
 }
 
