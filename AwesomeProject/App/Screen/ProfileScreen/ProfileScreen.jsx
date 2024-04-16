@@ -7,6 +7,9 @@ import {useUser} from '@clerk/clerk-expo';
 import Colors from '../../Utils/Colors';
 
 export default function ProfileScreen() {
+  const [fontsLoaded] = useFonts({
+    'qs': require('../../Utils/Quicksand-VariableFont_wght.ttf'),
+  });
 
   const {user}=useUser()
   const ProfileMenu=[
@@ -34,7 +37,7 @@ export default function ProfileScreen() {
   return (
     <SafeAreaView>
     <View style={{padding:20,paddingTop:30,backgroundColor:Colors.db}}>
-      <Text style={{fontSize:30,fontFamily:'outfit-bold',color:Colors.white}}>Profile</Text>
+      <Text style={{fontSize:30,fontFamily:'qs',color:Colors.white}}>Profile</Text>
       <View style={{display:'flex',
     justifyContent:'center',
     alignItems:'center',
@@ -42,8 +45,8 @@ export default function ProfileScreen() {
     }}>
        <Image source={{uri:user.imageUrl}} 
        style={{width:90,height:90,borderRadius:99}} /> 
-       <Text style={{fontSize:26,marginTop:8,fontFamily:'outfit-medium',color:Colors.white}}>{user.fullName}</Text>
-       <Text style={{fontSize:18,marginTop:8,fontFamily:'outfit-medium',color:Colors.white}}>{user?.primaryEmailAddress.emailAddress}</Text>
+       <Text style={{fontSize:26,marginTop:8,fontFamily:'qs',color:Colors.white}}>{user.fullName}</Text>
+       <Text style={{fontSize:18,marginTop:8,fontFamily:'qs',color:Colors.white}}>{user?.primaryEmailAddress.emailAddress}</Text>
       </View>
     </View>
 
@@ -54,7 +57,7 @@ export default function ProfileScreen() {
        <TouchableOpacity style={{display:'flex',flexDirection:'row',alignItems:'center',gap:10,marginBottom:20,
        paddingHorizontal:80}}>
         <Ionicons name={item.icon} size={40} color="black" />
-        <Text style={{fontFamily:'outfit',fontSize:20}}>{item.name}
+        <Text style={{fontFamily:'qs',fontSize:20}}>{item.name}
         
         </Text>
         </TouchableOpacity> 

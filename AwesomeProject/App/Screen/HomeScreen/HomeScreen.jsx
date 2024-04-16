@@ -1,17 +1,88 @@
-import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet } from 'react-native';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from 'react-native';
 import Colors from '../../Utils/Colors'; // Import your Colors file
+import * as ImagePicker from 'expo-image-picker';
+import * as Location from 'expo-location';
+import { useUser } from '@clerk/clerk-expo';
 
 export default function HomeScreen() {
-  const [imageUri, setImageUri] = React.useState(null);
-  const [textInput, setTextInput] = React.useState('');
+  const [imageUri, setImageUri] = useState(null);
+  const [textInput, setTextInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const { user } = useUser();
 
   const handleImageSelection = async () => {
-    // Implement image selection logic here
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
+
+      if (!result.cancelled) {
+        setImageUri(result.assets[0].uri);
+      }
+      console.log("acna",result.assets[0].uri)
+    } catch (error) {
+      console.error('Error selecting image:', error);
+    }
   };
 
   const handleSend = async () => {
-    // Implement send functionality here
+    try {
+      setLoading(true);
+
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.log('Location permission denied');
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+
+      let base64Image = null;
+      if (imageUri) {
+        const response = await fetch(imageUri);
+        const blob = await response.blob();
+        const reader = new FileReader();
+        await new Promise((resolve, reject) => {
+          reader.onload = () => resolve();
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+        base64Image = reader.result.split(',')[1];
+      }
+
+      const messageData = {
+        sender: user.fullName,
+        content: textInput,
+        imageUri: base64Image,
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      };
+
+      setUploading(true);
+
+      await fetch('http://172.17.18.148:3000/api/message', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(messageData),
+      });
+
+      setTextInput('');
+      setImageUri(null);
+      setLoading(false);
+      setUploading(false);
+      alert('Message sent successfully!');
+    } catch (error) {
+      console.error('Error sending message:', error);
+      setLoading(false);
+      setUploading(false);
+    }
   };
 
   return (
@@ -26,6 +97,8 @@ export default function HomeScreen() {
         <Text style={styles.buttonText}>Select Image</Text>
       </TouchableOpacity>
       {imageUri && <Image source={{ uri: imageUri }} style={styles.image} />}
+      {loading && <ActivityIndicator size="large" color={Colors.blue} />}
+      {uploading && <Text>Uploading...</Text>}
       <TouchableOpacity style={[styles.button, { backgroundColor: Colors.bg }]} onPress={handleSend}>
         <Text style={styles.buttonText}>Send</Text>
       </TouchableOpacity>
