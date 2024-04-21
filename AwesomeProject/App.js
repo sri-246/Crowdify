@@ -5,6 +5,7 @@ import { ClerkProvider, SignedIn, SignedOut } from '@clerk/clerk-expo';
 import * as SecureStore from "expo-secure-store";
 import { NavigationContainer } from '@react-navigation/native';
 import TabNavigation from './App/Navigations/TabNavigation';
+import { SessionProvider } from './App/Screen/HomeScreen/SessionContext';
 
 
 const tokenCache = {
@@ -27,6 +28,7 @@ const tokenCache = {
 export default function App() {;
   return (
     <ClerkProvider tokenCache={tokenCache} publishableKey='pk_test_c2FjcmVkLWVsZXBoYW50LTIxLmNsZXJrLmFjY291bnRzLmRldiQ'>
+      <SessionProvider> 
      <NavigationContainer>
     <View style={styles.container}>
     <SignedIn>
@@ -37,6 +39,7 @@ export default function App() {;
     </SignedOut>
     </View>
     </NavigationContainer>
+    </SessionProvider> 
     </ClerkProvider>
   );
 }

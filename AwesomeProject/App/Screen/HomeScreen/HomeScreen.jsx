@@ -1,16 +1,158 @@
+//HomeScreen.jsx
+
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from 'react-native';
-import Colors from '../../Utils/Colors'; // Import your Colors file
+import Colors from '../../Utils/Colors';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import { useUser } from '@clerk/clerk-expo';
+import { useSession } from './SessionContext';
+import * as TaskManager from 'expo-task-manager';
+import * as Notifications from 'expo-notifications';
+import registerForPushNotificationsAsync from './registerForPushNotificationsAsync';
+
+const LOCATION_TASK_NAME = 'background-location-task';
+
+
+// TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
+//   if (error) {
+//     console.error('Background location task error:', error.message);
+//     return;
+//   }
+//   if (data) {
+//     const { locations } = data;
+//     console.log('Received background location update:');
+//     locations.forEach(async (location) => {
+//       try {
+//         const locationUpdate ={
+//           email:user.primaryEmailAddress.emailAddress,
+//           latitude: location.coords.latitude,
+//           longitude: location.coords.longitude,
+//          // Add any other relevant data you want to send to the backend
+//           }
+
+//         const response = await fetch('http://192.168.43.160:3000/api/user/location', {
+//           method: 'POST',
+//           headers: {
+//             'Content-Type': 'application/json',
+//           },
+//           body: JSON.stringify(locationUpdate),
+//         });
+
+//         const responseData = await response.json();
+//         console.log('Location sent to backend:', responseData);
+//       } catch (error) {
+//         console.error('Error sending location to backend:', error);
+//       }
+//     });
+//   }
+// });
 
 export default function HomeScreen() {
   const [imageUri, setImageUri] = useState(null);
   const [textInput, setTextInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const { user } = useUser();
+  const {user} = useUser();
+  const { isAuthenticated } = useSession();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      getLocation();
+      
+    }
+    // return () => {
+    //   stopBackgroundLocationUpdates();
+    // };
+  }, [isAuthenticated]);
+
+  // const startBackgroundLocationUpdates = async () => {
+  //   try {
+  //     let { status } = await Location.requestBackgroundPermissionsAsync();
+  //     if (status !== 'granted') {
+  //       console.log('Background location permission denied');
+  //       return;
+  //     }
+  //     await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
+  //       accuracy: Location.Accuracy.Balanced,
+  //       timeInterval: 5000, // Update interval in milliseconds
+  //       distanceInterval: 0, // Minimum distance between updates in meters
+  //       deferredUpdatesInterval: 5000, // Interval to defer updates when the app is in the background
+  //       deferredUpdatesDistance: 0, // Distance to defer updates when the app is in the background
+  //       pausesUpdatesAutomatically: false, // Allow location updates to continue when the app is in the background
+  //     });
+  //     console.log('Background location updates started');
+  //   } catch (error) {
+  //     console.error('Error starting background location updates:', error);
+  //   }
+  // };
+
+  // const stopBackgroundLocationUpdates = async () => {
+  //   try {
+  //     await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME);
+  //     console.log('Background location updates stopped');
+  //   } catch (error) {
+  //     console.error('Error stopping background location updates:', error);
+  //   }
+  // };
+
+  const getLocation = async () => {
+    try {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.log('Location permission denied');
+        return;
+      }
+
+      let { status: status1 } = await Notifications.requestPermissionsAsync();
+      if (status1 !== 'granted') {
+        console.log('Notification permission denied');
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      if (location) {
+        sendLocation(location);
+        //startBackgroundLocationUpdates();
+      }
+    } catch (error) {
+      console.error('Error getting location:', error);
+    }
+  };
+
+  const sendLocation = async (location) => {
+    try {
+      const pushToken = await registerForPushNotificationsAsync();
+
+      const userData = {
+        username: user.fullName,
+        email: user.primaryEmailAddress.emailAddress,
+        location: location,
+        pushToken: pushToken
+      };
+
+      console.log("Data Collected", userData);
+
+      fetch('http://192.168.43.160:3000/api/user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      })
+        .then(response => response.json())
+        .then(data => {
+          console.log('Location Sent Success:', data);
+          // Handle success response from backend if needed
+        })
+        .catch(error => {
+          console.error('Error sending location:', error);
+          // Handle error from backend if needed
+        });
+    } catch (err) {
+      console.error("OAuth error", err);
+    }
+  };
 
   const handleImageSelection = async () => {
     try {
@@ -24,7 +166,7 @@ export default function HomeScreen() {
       if (!result.cancelled) {
         setImageUri(result.assets[0].uri);
       }
-      console.log("acna",result.assets[0].uri)
+      console.log("Image uri", result.assets[0].uri)
     } catch (error) {
       console.error('Error selecting image:', error);
     }
@@ -56,7 +198,7 @@ export default function HomeScreen() {
       }
 
       const messageData = {
-        sender: user.fullName,
+        sender: user.primaryEmailAddress.emailAddress,
         content: textInput,
         imageUri: base64Image,
         latitude: location.coords.latitude,
@@ -65,7 +207,7 @@ export default function HomeScreen() {
 
       setUploading(true);
 
-      await fetch('http://172.17.18.148:3000/api/message', {
+      await fetch('http://192.168.43.160:3000/api/message', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -105,6 +247,7 @@ export default function HomeScreen() {
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
