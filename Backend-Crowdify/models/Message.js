@@ -1,4 +1,4 @@
-// Define MongoDB schema and model for messages
+// Message.js
 const mongoose = require('mongoose');
 
 const messageSchema = new mongoose.Schema({

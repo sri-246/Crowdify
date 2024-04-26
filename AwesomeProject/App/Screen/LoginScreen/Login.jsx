@@ -59,10 +59,10 @@ export default function Login() {
         <Image source={require('./../../../assets/images/HomeLogo.png')} style={styles.homelogo} />
       </View>
       <View style={styles.subcon}>
-        <Text style={styles.hometext}>Welcome to <Text style={{ fontWeight: '900' }}>CROWDIFY</Text></Text>
-        <Text style={styles.hometext2}><Text style={{ fontWeight: '900' }}>Stay</Text> Connected With People</Text>
+        <Text style={styles.hometext}>Welcome to <Text style={{ fontWeight: 'bold' }}>CROWDIFY</Text></Text>
+        <Text style={styles.hometext2}>Stay Connected With People</Text>
         <TouchableOpacity style={styles.button} onPress={onPress}>
-          <Text style={{ textAlign: "center", color: Colors.bg, fontSize: wp('4.5%'), fontFamily: 'as' }}>Sign In or Sign Up</Text>
+          <Text style={{ textAlign: "center", color: Colors.bg, fontSize: wp('4.5%'), fontFamily: 'normal' }}>Let's Get Started</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -86,21 +86,20 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   hometext2: {
-    fontSize: wp('6%'),
-    fontFamily: 'as',
+    fontSize: wp('5%'),
     color: 'white',
     alignSelf: 'baseline',
     paddingLeft: wp('5%'),
     paddingRight: wp('5%'),
-    maxWidth: wp('50%')
+    
   },
   hometext: {
     alignSelf: 'baseline',
-    paddingBottom: wp('5%'),
+    paddingBottom: wp('2%'),
     paddingLeft: wp('5%'),
     paddingRight: wp('5%'),
     fontSize: wp('6%'),
-    fontFamily: 'as',
+    fontFamily: 'normal',
     color: 'white',
   },
   subcon: {

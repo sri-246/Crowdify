@@ -20,7 +20,8 @@ const userSchema = new mongoose.Schema({
     accuracy: Number,
     heading: Number
   },
-  pushToken: String
+  pushToken: String,
+  receivedMessages: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Message' }] // New field to store received messages
 });
 
 // Define a 2dsphere index on the location field

@@ -26,10 +26,6 @@ mongoose.connect(MONGODB_URI)
     console.error('Error connecting to MongoDB Atlas:', error);
   });
 
-
-
-
-  
 // User registration route
 app.post('/api/user', async (req, res) => {
   console.log('Received request:', req.body);
@@ -50,6 +46,8 @@ app.post('/api/user', async (req, res) => {
         heading: location.coords.heading
       };
       await user.save();
+      const id = user._id;
+      res.status(201).json({ message: 'User data saved successfully', id });
     } else {
       // If the user doesn't exist, create a new user with the provided data
       user = new User({
@@ -66,38 +64,42 @@ app.post('/api/user', async (req, res) => {
         pushToken
       });
       await user.save();
+      const id = user._id;
+      res.status(201).json({ message: 'User data saved successfully', id });
     }
-
-    res.status(201).json({ message: 'User data saved successfully' });
   } catch (error) {
     console.error('Error saving user data:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
+
 app.post('/api/user/location', async (req, res) => {
   console.log('Received request:', req.body);
   try {
-    const { email, latitude,longitude } = req.body;
+    const { email,latitude,longitude } = req.body;
 
-    // Check if the user already exists in the database
+    //Check if the user already exists in the database
     let user = await User.findOne({ email });
 
-    // If the user exists, update their location
+    //If the user exists, update their location
     if (user) {
       user.location = {
         type: 'Point',
         coordinates: [longitude,latitude],
       };
       await user.save();
+      res.status(201).json({ message: 'User data saved successfully' });
     }else{
       console.log("User not found")
+        res.status(201).json({ message: ' Not saved ' });
     }
-    res.status(201).json({ message: 'User data saved successfully' });
-  } catch (error) {
+  }
+   catch (error) {
     console.error('Error saving user data:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
+  
 });
 
 // Message creation route
@@ -122,10 +124,16 @@ app.post('/api/message', async (req, res) => {
     const filteredNearbyUsers = nearbyUsers.filter(user => user.email !== sender);
 
     // Send notifications to filtered nearby users
+    for (const user of filteredNearbyUsers) {
+      await User.findByIdAndUpdate(user._id, {
+        $push: { receivedMessages: message._id }
+      });
+    }
+
     filteredNearbyUsers.forEach(async (user) => {
     console.log("Message",message)
     await sendNotification(user, message);
-    
+
      });
 
     res.status(201).json({ message: 'Message data saved successfully' });
@@ -134,6 +142,33 @@ app.post('/api/message', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+app.get('/api/fetchmessage/:email', async (req, res) => {
+  try {
+    // Get the email from request parameters
+    console.log("got it")
+    console.log(req.params.email)
+    const email = req.params.email;
+
+    // Find the user by email and populate the receivedMessages field
+    const user = await User.findOne({ email }).populate('receivedMessages');
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Extract the received messages from the user object
+    const receivedMessages = user.receivedMessages;
+
+
+    // Return the received messages
+    res.status(200).json({ receivedMessages });
+  } catch (error) {
+    console.error('Error fetching received messages:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
