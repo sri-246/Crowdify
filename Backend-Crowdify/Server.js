@@ -15,7 +15,7 @@ const Message = require('./models/Message');
 const ChatMessage = require('./models/ChatMessage'); // Import the Message model
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(cors());
 const server = http.createServer(app);
@@ -57,8 +57,8 @@ mongoose.connect(MONGODB_URI)
       console.log('User disconnected');
     });
   });  
-  server.listen(10000, () => {
-    console.log(`Express server and socket.io server are running on port 10000`);
+  server.listen(4000, () => {
+    console.log(`Express server and socket.io server are running on port 4000`);
   });
   
 // User registration route
