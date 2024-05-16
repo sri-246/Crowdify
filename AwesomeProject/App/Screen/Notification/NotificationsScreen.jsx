@@ -29,7 +29,7 @@ export default function NotificationsScreen() {
       const email = user.primaryEmailAddress.emailAddress; // Replace '123' with actual userId
       console.log(email);
       // Fetch received messages from backend API
-      const response = await fetch(`http://192.168.43.160:3000/api/fetchmessage/${email}`, {
+      const response = await fetch(`https://crowdify.onrender.com/api/fetchmessage/${email}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -56,7 +56,7 @@ export default function NotificationsScreen() {
   const handleAccept = async () => {
     try {
       // Send a request to backend to handle accept action
-      const response = await fetch('http://192.168.43.160:3000/api/accept', {
+      const response = await fetch('https://crowdify.onrender.com/api/accept', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

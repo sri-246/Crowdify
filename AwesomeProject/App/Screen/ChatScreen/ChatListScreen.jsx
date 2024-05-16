@@ -13,7 +13,7 @@ const ChatListScreen = () => {
 
   const fetchChatList = async () => {
     try {
-      const response = await fetch(`http://192.168.43.160:3000/api/chats/${user.primaryEmailAddress.emailAddress}`);
+      const response = await fetch(`https://crowdify.onrender.com/api/chats/${user.primaryEmailAddress.emailAddress}`);
       const data = await response.json();
       setChats(data.chats);
     } catch (error) {

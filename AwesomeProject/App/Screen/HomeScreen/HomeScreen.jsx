@@ -35,7 +35,7 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
           longitude: location.coords.longitude,
         }
 
-        const response = await fetch(`http://192.168.43.160:3000/api/user/location`, {
+        const response = await fetch(`https://crowdify.onrender.com/api/user/location`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -150,7 +150,7 @@ export default function HomeScreen() {
 
       console.log("Data Collected", userData);
 
-      fetch(`http://192.168.43.160:3000/api/user`, {
+      fetch(`https://crowdify.onrender.com/api/user`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -266,7 +266,7 @@ export default function HomeScreen() {
   
       setUploading(true);
   
-      await fetch(`http://192.168.43.160:3000/api/message`, {
+      await fetch(`https://crowdify.onrender.com/api/message`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

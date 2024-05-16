@@ -15,12 +15,12 @@ const Message = require('./models/Message');
 const ChatMessage = require('./models/ChatMessage'); // Import the Message model
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(cors());
 const server = http.createServer(app);
 const io = socketIo(server);
-
+io.use(cors())
 const MONGODB_URI = 'mongodb+srv://kamalnath123:2kx0jjefOTT0RCAX@portfolio.hbkryah.mongodb.net/Details?retryWrites=true&w=majority&appName=CrowdifyUser'; // Update with your MongoDB URI
 
 mongoose.connect(MONGODB_URI)
@@ -57,8 +57,8 @@ mongoose.connect(MONGODB_URI)
       console.log('User disconnected');
     });
   });  
-  server.listen(4000, () => {
-    console.log(`Express server and socket.io server are running on port 4000`);
+  server.listen(10000, () => {
+    console.log(`Express server and socket.io server are running on port 10000`);
   });
   
 // User registration route
