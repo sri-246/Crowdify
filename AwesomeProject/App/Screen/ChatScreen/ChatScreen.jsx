@@ -17,7 +17,7 @@ const ChatScreen = ({ route, navigation }) => {
     if (socket) {
       socket.disconnect();
     }
-    const newSocket = io('https://crowdify.onrender.com:4000');
+    const newSocket = io('https://crowdify.onrender.com');
     setSocket(newSocket);
     fetchPreviousChatMessages();
 

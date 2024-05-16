@@ -57,8 +57,8 @@ mongoose.connect(MONGODB_URI)
       console.log('User disconnected');
     });
   });  
-  server.listen(4000, () => {
-    console.log(`Express server and socket.io server are running on port 4000`);
+  server.listen(PORT, () => {
+    console.log(`Express server and socket.io server are running on port ${PORT}`);
   });
   
 // User registration route
