@@ -1,5 +1,4 @@
-//TabNavigation.jsx
-
+import { createStackNavigator } from '@react-navigation/stack';
 import { View, Text } from 'react-native';
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -11,12 +10,15 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
 import { AntDesign } from '@expo/vector-icons';
 import Colors from '../Utils/Colors';
+import ChatListScreen from '../Screen/ChatScreen/ChatListScreen';
 
+const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
-export default function TabNavigation() {
-  return (
-    <Tab.Navigator 
+export default function AppNavigator() {
+  function BottomTabs(){
+    return (
+      <Tab.Navigator 
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: Colors.bg
@@ -36,8 +38,8 @@ export default function TabNavigation() {
       />
       
       <Tab.Screen 
-        name='chat' 
-        component={ChatScreen}
+        name='chatlist' 
+        component={ChatListScreen}
         options={{
           tabBarLabel: ({ color }) => (
             <Text></Text>
@@ -73,6 +75,16 @@ export default function TabNavigation() {
           )
         }}
       />
+      
     </Tab.Navigator>
+
+    )
+  }
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="main" component={BottomTabs} options={{ headerShown: false }}/>
+      <Stack.Screen name="ChatScreen" component={ChatScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="ChatListScreen" component={ChatListScreen} options={{ headerShown: false }} />
+    </Stack.Navigator>
   );
 }

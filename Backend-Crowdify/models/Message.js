@@ -5,6 +5,7 @@ const messageSchema = new mongoose.Schema({
     Sender: String,
     Content: String,
     ImageUri: String,
+    AudioUri: String,
     latitude: Number,
     longitude:Number,
   });

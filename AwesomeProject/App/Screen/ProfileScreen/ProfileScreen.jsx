@@ -1,3 +1,5 @@
+//ProfileScreen.jsx
+
 import { View, Text, Image, FlatList, TouchableOpacity } from 'react-native'
 import React from 'react'
 import { useFonts } from 'expo-font';

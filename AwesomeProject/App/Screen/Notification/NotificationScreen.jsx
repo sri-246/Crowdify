@@ -8,31 +8,27 @@ export default function App() {
   const responseListener = useRef();
 
   useEffect(() => {
-    // Register for push notifications
     registerForPushNotificationsAsync().then(token => {
       console.log(token);
     });
 
-    // Listen for notifications when the app is in the foreground
     notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+      // Update state to handle foreground notifications
       setNotification(notification);
     });
 
-    // Listen for notification responses
     responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
       console.log(response);
     });
-
-    // Define notification handler for foreground notifications
-    Notifications.setNotificationHandler({
-      handleNotification: async () => ({
-        shouldShowAlert: true,
-        shouldPlaySound: true,
-        shouldSetBadge: false,
-      }),
-    });
-
-    // Clean up listeners when component unmounts
+    Notifications.setNotificationCategoryAsync('foreground', [
+      {
+        identifier: 'foreground',
+        actions: [],
+        options: {
+          isOverlay: false,
+        },
+      },
+    ]);
     return () => {
       Notifications.removeNotificationSubscription(notificationListener.current);
       Notifications.removeNotificationSubscription(responseListener.current);
@@ -40,12 +36,18 @@ export default function App() {
   }, []);
 
   const registerForPushNotificationsAsync = async () => {
-    // Implementation for registering push notifications
-    // For example, you can use Expo's push notification API
-    // See: https://docs.expo.dev/push-notifications/overview/
-    // This function should return the push token
+    // Implement push notification registration here
     return 'ExpoPushToken';
   };
+
+  // Update notification handler for foreground notifications
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+    }),
+  });
 
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>

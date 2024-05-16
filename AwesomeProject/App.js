@@ -1,11 +1,11 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Login from './App/Screen/LoginScreen/Login';
 import { ClerkProvider, SignedIn, SignedOut } from '@clerk/clerk-expo';
 import * as SecureStore from "expo-secure-store";
 import { NavigationContainer } from '@react-navigation/native';
-import TabNavigation from './App/Navigations/TabNavigation';
 import { SessionProvider } from './App/Screen/HomeScreen/SessionContext';
+import AppNavigator from './App/Navigations/AppNavigator';
 
 
 const tokenCache = {
@@ -25,21 +25,22 @@ const tokenCache = {
   },
 };
 
-export default function App() {;
+export default function App() {
   return (
     <ClerkProvider tokenCache={tokenCache} publishableKey='pk_test_c2FjcmVkLWVsZXBoYW50LTIxLmNsZXJrLmFjY291bnRzLmRldiQ'>
-      <SessionProvider> 
-     <NavigationContainer>
-    <View style={styles.container}>
-    <SignedIn>
-            <TabNavigation/>
-    </SignedIn>
-    <SignedOut>
-      <Login/>
-    </SignedOut>
-    </View>
-    </NavigationContainer>
-    </SessionProvider> 
+      <SessionProvider>
+        <NavigationContainer>
+          <View style={styles.container}>
+            <SignedIn>
+              <AppNavigator/>
+            </SignedIn>
+            
+            <SignedOut>
+              <Login/>
+            </SignedOut>
+          </View>
+        </NavigationContainer>
+      </SessionProvider>
     </ClerkProvider>
   );
 }

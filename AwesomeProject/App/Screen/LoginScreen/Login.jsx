@@ -1,11 +1,11 @@
 //Login.jsx
 
-import { StyleSheet, View, Text, Image, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, Image, TouchableOpacity, PermissionsAndroid } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import Colors from '../../Utils/Colors';
 import { useFonts } from "expo-font";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-import { useOAuth,useUser } from "@clerk/clerk-expo";
+import { useOAuth } from "@clerk/clerk-expo";
 import { useWarmUpBrowser } from "../../hooks/useWarmUpBrowser";
 import * as WebBrowser from "expo-web-browser";
 import { useSession } from '../HomeScreen/SessionContext';
@@ -27,9 +27,33 @@ export default function Login() {
   useEffect(() => {
     if (fontsLoaded) {
       // Fonts are loaded, you can proceed with the rest of the component initialization
+      requestPermissions(); // Request permissions once fonts are loaded
     }
   }, [fontsLoaded]);
 
+  const requestPermissions = async () => {
+    try {
+      // Request multiple permissions using PermissionsAndroid.requestMultiple
+      const granted = await PermissionsAndroid.requestMultiple([
+        PermissionsAndroid.PERMISSIONS.CAMERA,
+        PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+        PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
+      ]);
+
+      // Check if all permissions are granted
+      const allGranted = Object.values(granted).every((permission) => permission === PermissionsAndroid.RESULTS.GRANTED);
+      
+      if (!allGranted) {
+        // Handle case where not all permissions are granted
+        console.log("Some permissions are not granted");
+      }
+    } catch (error) {
+      console.error('Error requesting permissions:', error);
+    }
+  };
   const onPress = async () => {
     try {
       const { createdSessionId, signIn, signUp, setActive } = await startOAuthFlow();

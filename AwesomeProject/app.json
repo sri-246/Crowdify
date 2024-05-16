@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "AwesomeProject",
+    "name": "Crowdify",
     "slug": "awesomeproject",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -23,7 +23,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "scheme": "crowdify",
+      
       "package": "com.kamalnath123.awesomeproject"
     },
     "web": {
@@ -34,6 +34,7 @@
         "projectId": "29a37adb-2c24-486e-9c2f-302ea5fd028d"
       }
     },
-    "owner": "kamalnath123"
+    "owner": "kamalnath123",
+    "scheme": ["crowdify"]
   }
 }
