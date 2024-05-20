@@ -1,8 +1,16 @@
-// HomeScreen.jsx
-
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context'
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  ActivityIndicator,
+  Dimensions,
+  Alert
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Colors from '../../Utils/Colors';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
@@ -12,7 +20,12 @@ import * as TaskManager from 'expo-task-manager';
 import * as Notifications from 'expo-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import registerForPushNotificationsAsync from './registerForPushNotificationsAsync';
-import { Audio } from 'expo-av'; // Import Audio module from expo-av
+import { Audio } from 'expo-av';
+import { LinearGradient } from 'expo-linear-gradient';
+import { FontAwesome } from '@expo/vector-icons';
+import LottieView from 'lottie-react-native';
+
+const { width, height } = Dimensions.get('window');
 
 const LOCATION_TASK_NAME = 'background-location-tjgask';
 
@@ -35,7 +48,7 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
           longitude: location.coords.longitude,
         }
 
-        const response = await fetch(`https://crowdify.onrender.com/api/user/location`, {
+        const response = await fetch(`http://192.168.43.160:3000/api/user/location`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -57,10 +70,11 @@ export default function HomeScreen() {
   const [textInput, setTextInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const { user } = useUser();
   const { isAuthenticated } = useSession();
-  const [recording, setRecording] = useState(null); // State to manage recording
-  const [base64Audio, setBase64Audio] = useState(null); // State to store base64 audio
+  const [recording, setRecording] = useState(null);
+  const [base64Audio, setBase64Audio] = useState(null);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -130,7 +144,7 @@ export default function HomeScreen() {
   const sendLocation = async (location) => {
     try {
       const pushToken = await registerForPushNotificationsAsync();
-      const img = user.imageUrl
+      const img = user.imageUrl;
       const response = await fetch(img);
       const blob = await response.blob();
       const reader = new FileReader();
@@ -150,7 +164,7 @@ export default function HomeScreen() {
 
       console.log("Data Collected", userData);
 
-      fetch(`https://crowdify.onrender.com/api/user`, {
+      fetch(`http://192.168.43.160:3000/api/user`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -181,12 +195,12 @@ export default function HomeScreen() {
       if (!result.cancelled) {
         setImageUri(result.assets[0].uri);
       }
-      console.log("Image uri", result.assets[0].uri)
+      console.log("Image uri", result.assets[0].uri);
     } catch (error) {
       console.error('Error selecting image:', error);
     }
   };
-  
+
   const startRecording = async () => {
     console.log('Starting recording..');
     try {
@@ -203,14 +217,14 @@ export default function HomeScreen() {
       console.error('Failed to start recording', error);
     }
   };
- 
+
   const stopRecording = async () => {
     console.log('Stopping recording..');
     setRecording(undefined);
     await recording.stopAndUnloadAsync();
     const uri1 = recording.getURI(); // Get the URI of the recorded audio
     console.log('Recording stopped and stored at', uri1);
-  
+
     // Convert the recorded audio file to base64
     try {
       const response = await fetch(uri1);
@@ -221,28 +235,24 @@ export default function HomeScreen() {
         reader.onerror = reject;
         reader.readAsDataURL(audioBlob);
       });
-      const base64Audio = reader.result.split(',')[1]; //this
+      const base64Audio = reader.result.split(',')[1];
       setBase64Audio(base64Audio);
-      //log
-      
-      // Now you can do something with the base64Audio, such as storing it in state or sending it to the backend
     } catch (error) {
       console.error('Error converting audio to base64:', error);
     }
   };
-  
 
   const handleSend = async () => {
     try {
       setLoading(true);
-  
+
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
         console.log('Location permission denied');
         return;
       }
       let location = await Location.getCurrentPositionAsync({});
-  
+
       let base64Image = null;
       if (imageUri) {
         const response = await fetch(imageUri);
@@ -259,59 +269,103 @@ export default function HomeScreen() {
         sender: user.primaryEmailAddress.emailAddress,
         content: textInput,
         imageUri: base64Image,
-        audioUri: base64Audio,// want to be sent here
+        audioUri: base64Audio,
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
       };
-  
+
       setUploading(true);
-  
-      await fetch(`https://crowdify.onrender.com/api/message`, {
+
+      await fetch(`http://192.168.43.160:3000/api/message`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(messageData),
       });
-  
+
       setTextInput('');
       setImageUri(null);
-      setRecording(null);
       setBase64Audio(null);
-      setLoading(false);
-      setUploading(false);
-      alert('Message sent successfully!');
+      setSuccessMessage('Message Sent');
+      showAlert('Success', 'Message Sent');
     } catch (error) {
       console.error('Error sending message:', error);
+    } finally {
       setLoading(false);
       setUploading(false);
     }
   };
 
+  const showAlert = (title, message) => {
+    Alert.alert(
+      title,
+      message,
+      [{ text: 'OK', onPress: () => console.log('OK Pressed') }],
+      { cancelable: false }
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      <TextInput
-        style={styles.input}
-        placeholder="Type your message..."
-        onChangeText={setTextInput}
-        value={textInput}
-      />
-      <TouchableOpacity style={styles.button} onPress={handleImageSelection}>
-        <Text style={styles.buttonText}>Select Image</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={[styles.button, recording ? { backgroundColor: 'red' } : null]}
-        onPressIn={startRecording} // Start recording when pressed
-        onPressOut={stopRecording} // Stop recording when released
+      <LinearGradient
+        colors={[Colors.white, Colors.white]}
+        style={styles.gradientBackground}
       >
-        <Text style={styles.buttonText}>{recording ? 'Recording...' : 'Record Audio'}</Text>
-      </TouchableOpacity>
-      {imageUri && <Image source={{ uri: imageUri }} style={styles.image} />}
-      {loading && <ActivityIndicator size="large" color={Colors.blue} />}
-      {uploading && <Text>Uploading...</Text>}
-      <TouchableOpacity style={[styles.button, { backgroundColor: Colors.bg }]} onPress={handleSend}>
-        <Text style={styles.buttonText}>Send</Text>
-      </TouchableOpacity>
+        <View style={styles.header}>
+          <LottieView
+            style={styles.lottie}
+            source={require('./animationWelcome.json')}
+            autoPlay
+            loop
+          />
+        </View>
+        <TextInput
+          style={styles.textInput}
+          placeholder="Type your message here..."
+          value={textInput}
+          onChangeText={setTextInput}
+          textAlignVertical="top"
+        />
+        {imageUri && (
+          <Image source={{ uri: imageUri }} style={styles.image} />
+        )}
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.button} onPress={handleImageSelection}>
+            <LinearGradient
+              colors={[Colors.gradientStart, Colors.gradientEnd]}
+              style={styles.buttonGradient}
+            >
+              <FontAwesome name="image" size={22} color="white" />
+            </LinearGradient>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={recording ? stopRecording : startRecording}
+          >
+            <LinearGradient
+              colors={[Colors.gradientStart, Colors.gradientEnd]}
+              style={styles.buttonGradient}
+            >
+              <FontAwesome
+                name={recording ? "stop" : "microphone"}
+                size={22}
+                color="white"
+                style= {{padding:width * 0.03}}
+              />
+            </LinearGradient>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={handleSend}>
+            <LinearGradient
+              colors={[Colors.gradientStart, Colors.gradientEnd]}
+              style={styles.buttonGradient}
+            >
+              <FontAwesome name="send" size={22} color={Colors.white} />
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+        {uploading && <ActivityIndicator size="large" color="#FFA500" />}
+      </LinearGradient>
     </SafeAreaView>
   );
 }
@@ -319,33 +373,48 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
-  input: {
-    borderWidth: 1,
-    borderColor: 'gray',
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 20,
-    width: '80%',
+  gradientBackground: {
+    flex: 1,
+    padding: width * 0.04,
   },
-  button: {
-    backgroundColor: 'blue',
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 20,
-    width: '80%',
-    alignItems: 'center',
+  header: {
+    marginBottom: -height * 0.03,
+    marginTop: -height * 0.12,
   },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
+  lottie: {
+    width: width * 0.5,
+    height: height * 0.3,
+  },
+  textInput: {
+    height: height * 0.25,
+    borderColor: Colors.gradientStart,
+    borderWidth: width * 0.01,
+    borderRadius: width * 0.05,
+    backgroundColor: '#fff',
+    paddingHorizontal: width * 0.03,
+    paddingVertical: width * 0.03,
+    marginBottom: height * 0.04,
   },
   image: {
-    width: '80%',
-    height: 200,
-    marginBottom: 20,
+    width: '100%',
+    height: height * 0.25,
+    borderRadius: width * 0.05,
+    marginBottom: height * 0.04,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  button: {
+    flex: 1,
+    marginHorizontal: width * 0.01,
+  },
+  buttonGradient: {
+    borderRadius: width * 0.09,
+    padding: width * 0.03,
+    alignItems: 'center',
   },
 });
+
 

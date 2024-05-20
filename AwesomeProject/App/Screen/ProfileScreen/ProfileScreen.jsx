@@ -1,21 +1,19 @@
-//ProfileScreen.jsx
-
-import { View, Text, Image, FlatList, TouchableOpacity } from 'react-native'
-import React from 'react'
+import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions, ScrollView } from 'react-native';
+import React from 'react';
 import { useFonts } from 'expo-font';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons'
-import { useUser, useClerk } from '@clerk/clerk-react'; // Import useClerk for authentication management
+import { Ionicons } from '@expo/vector-icons';
+import { useUser, useClerk } from '@clerk/clerk-react';
 import Colors from '../../Utils/Colors';
-import { useNavigation } from '@react-navigation/native';
+
+const { height } = Dimensions.get('window');
 
 export default function ProfileScreen() {
   const [fontsLoaded] = useFonts({
     'qs': require('../../Utils/Quicksand-VariableFont_wght.ttf'),
   });
   const { user } = useUser();
-  const { signOut } = useClerk(); // Get signOut function from useClerk
-  const navigation = useNavigation();
+  const { signOut } = useClerk();
 
   if (!fontsLoaded) {
     return <Image
@@ -23,30 +21,11 @@ export default function ProfileScreen() {
       style={{ alignSelf: 'center', width: 55, height: 55 }}
     />;
   }
-  
-  const ProfileMenu = [
-    {
-      id: 1,
-      name: "About",
-      icon: 'information-circle',
-    },
-    {
-      id: 2,
-      name: "Help",
-      icon: 'people-sharp',
-    },
-    {
-      id: 3,
-      name: "Setting",
-      icon: 'settings',
-    },
-  ];
 
   const handleLogout = () => {
     signOut()
       .then(() => {
-        // Navigate back to the Login screen
-        console.log("logged out")
+        console.log("logged out");
       })
       .catch(error => {
         console.error("Error signing out:", error);
@@ -54,38 +33,135 @@ export default function ProfileScreen() {
   };
 
   return (
-    <SafeAreaView>
-      <View style={{ padding: 20, paddingTop: 30, backgroundColor: Colors.db }}>
-        <Text style={{ fontSize: 30, fontFamily: 'qs', color: Colors.white }}>Profile</Text>
-        <View style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          padding: 20,
-        }}>
-          <Image source={{ uri: user.imageUrl }}
-            style={{ width: 90, height: 90, borderRadius: 99 }} />
-          <Text style={{ fontSize: 26, marginTop: 8, fontFamily: 'qs', color: Colors.white }}>{user.fullName}</Text>
-          <Text style={{ fontSize: 18, marginTop: 8, fontFamily: 'qs', color: Colors.white }}>{user?.primaryEmailAddress.emailAddress}</Text>
+    <SafeAreaView style={styles.container}>
+      <ScrollView>
+        <View style={styles.header}>
+          <Ionicons name="menu" size={24} color={Colors.white} />
+          <View style={styles.iconGroup}>
+            <Ionicons name="chatbubble-ellipses-outline" size={24} color={Colors.white} style={styles.icon} />
+            <Ionicons name="notifications-outline" size={24} color={Colors.white} />
+          </View>
         </View>
-      </View>
-
-      <View style={{ paddingTop: 60 }}>
-        <FlatList
-          data={ProfileMenu}
-          renderItem={({ item, index }) => (
-            <TouchableOpacity style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 20, paddingHorizontal: 80 }}>
-              <Ionicons name={item.icon} size={40} color="black" />
-              <Text style={{ fontFamily: 'qs', fontSize: 20 }}>{item.name}</Text>
-            </TouchableOpacity>
-          )}
-          keyExtractor={(item) => item.id.toString()} // Add key extractor for FlatList
-        />
-      </View>
-
-      <TouchableOpacity onPress={handleLogout} style={{ alignSelf: 'center', backgroundColor: Colors.bg, padding: 10, borderRadius: 10, marginTop: 20 }}>
-        <Text style={{ fontFamily: 'qs', fontSize: 20, color: Colors.white }}>Logout</Text>
-      </TouchableOpacity>
+        <Image source={{ uri: user.imageUrl }} style={styles.profileImage} />
+        <View style={styles.userInfoContainer}>
+          <Text style={styles.userName}>{user.fullName}</Text>
+          <TouchableOpacity style={styles.followButton}>
+            <Text style={styles.followButtonText}>+ Follow</Text>
+          </TouchableOpacity>
+          <View style={styles.statsContainer}>
+            <View style={styles.stat}>
+              <Text style={styles.statNumber}>4.8</Text>
+              <Text style={styles.statLabel}>Rating</Text>
+            </View>
+            <View style={styles.stat}>
+              <Text style={styles.statNumber}>1024</Text>
+              <Text style={styles.statLabel}>Heat</Text>
+            </View>
+          </View>
+          <View style={styles.contactInfo}>
+            <Ionicons name="location-outline" size={20} color={Colors.white} />
+            <Text style={styles.contactText}>281 Piper Ave. Utica, NY 13501</Text>
+          </View>
+          <Text style={styles.emailText}>{user?.primaryEmailAddress.emailAddress}</Text>
+        </View>
+        <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+          <Text style={styles.logoutButtonText}>Logout</Text>
+        </TouchableOpacity>
+      </ScrollView>
     </SafeAreaView>
-  )
+  );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Colors.db,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 20,
+  },
+  iconGroup: {
+    flexDirection: 'row',
+  },
+  icon: {
+    marginHorizontal: 10,
+  },
+  profileImage: {
+    width: '100%',
+    height: height / 2,
+  },
+  userInfoContainer: {
+    padding: 20,
+  },
+  userName: {
+    fontSize: 26,
+    fontFamily: 'qs',
+    color: Colors.white,
+    textAlign: 'center',
+  },
+  followButton: {
+    alignSelf: 'center',
+    backgroundColor: Colors.pink,
+    paddingVertical: 5,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    marginTop: 10,
+  },
+  followButtonText: {
+    fontSize: 18,
+    color: Colors.white,
+    fontFamily: 'qs',
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 20,
+  },
+  stat: {
+    alignItems: 'center',
+  },
+  statNumber: {
+    fontSize: 24,
+    color: Colors.white,
+    fontFamily: 'qs',
+  },
+  statLabel: {
+    fontSize: 16,
+    color: Colors.white,
+    fontFamily: 'qs',
+  },
+  contactInfo: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 30,
+  },
+  contactText: {
+    fontSize: 18,
+    color: Colors.white,
+    fontFamily: 'qs',
+    marginLeft: 10,
+  },
+  emailText: {
+    fontSize: 18,
+    color: Colors.white,
+    fontFamily: 'qs',
+    textAlign: 'center',
+    marginTop: 10,
+  },
+  logoutButton: {
+    backgroundColor: Colors.bg,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    alignSelf: 'center',
+    marginTop: 40,
+  },
+  logoutButtonText: {
+    fontSize: 20,
+    color: Colors.white,
+    fontFamily: 'qs',
+  },
+});
