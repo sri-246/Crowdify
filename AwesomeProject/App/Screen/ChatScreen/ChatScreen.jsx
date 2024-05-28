@@ -21,7 +21,7 @@ const ChatScreen = ({ route, navigation }) => {
     if (socket) {
       socket.disconnect();
     }
-    const newSocket = io('http://192.168.43.160:4000');
+    const newSocket = io('http://172.17.21.15:4000');
     setSocket(newSocket);
     fetchPreviousChatMessages();
 
@@ -71,7 +71,7 @@ const ChatScreen = ({ route, navigation }) => {
   const fetchPreviousChatMessages = async () => {
     try {
       const sender = user.primaryEmailAddress.emailAddress;
-      const response = await fetch(`http://192.168.43.160:3000/api/chatmessages/${sender}/${recipient}`);
+      const response = await fetch(`http://172.17.21.15:3000/api/chatmessages/${sender}/${recipient}`);
       const data = await response.json();
       const serializedData = JSON.parse(JSON.stringify(data)); // Serialize data
       setMessages(serializedData);

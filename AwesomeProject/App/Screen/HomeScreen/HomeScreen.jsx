@@ -20,10 +20,12 @@ import * as TaskManager from 'expo-task-manager';
 import * as Notifications from 'expo-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import registerForPushNotificationsAsync from './registerForPushNotificationsAsync';
-import { Audio } from 'expo-av';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FontAwesome } from '@expo/vector-icons';
 import LottieView from 'lottie-react-native';
+
+import { startRecording, stopRecording } from './audioUtils';
+import { ScrollView } from 'react-native-gesture-handler';
 
 const { width, height } = Dimensions.get('window');
 
@@ -48,7 +50,7 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
           longitude: location.coords.longitude,
         }
 
-        const response = await fetch(`http://192.168.43.160:3000/api/user/location`, {
+        const response = await fetch(`http://172.17.21.15:3000/api/user/location`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -75,6 +77,7 @@ export default function HomeScreen() {
   const { isAuthenticated } = useSession();
   const [recording, setRecording] = useState(null);
   const [base64Audio, setBase64Audio] = useState(null);
+  const [acceptedUsers, setAcceptedUsers] = useState([]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -84,11 +87,11 @@ export default function HomeScreen() {
       stopBackgroundLocationUpdates();
     };
   }, [isAuthenticated]);
-
+   
   const startBackgroundLocationUpdates = async () => {
     try {
       await AsyncStorage.setItem('userId', user.primaryEmailAddress.emailAddress);
-
+  
       let { status } = await Location.requestBackgroundPermissionsAsync();
       if (status !== 'granted') {
         console.log('Background location permission denied');
@@ -107,7 +110,7 @@ export default function HomeScreen() {
       console.error('Error starting background location updates:', error);
     }
   };
-
+  
   const stopBackgroundLocationUpdates = async () => {
     try {
       await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME);
@@ -116,6 +119,7 @@ export default function HomeScreen() {
       console.error('Error stopping background location updates:', error);
     }
   };
+  
 
   const getLocation = async () => {
     try {
@@ -164,7 +168,7 @@ export default function HomeScreen() {
 
       console.log("Data Collected", userData);
 
-      fetch(`http://192.168.43.160:3000/api/user`, {
+      fetch(`http://172.17.21.15:3000/api/user`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -198,47 +202,6 @@ export default function HomeScreen() {
       console.log("Image uri", result.assets[0].uri);
     } catch (error) {
       console.error('Error selecting image:', error);
-    }
-  };
-
-  const startRecording = async () => {
-    console.log('Starting recording..');
-    try {
-      const { status } = await Audio.requestPermissionsAsync();
-      if (status !== 'granted') {
-        console.error('Permission to record audio not granted');
-        return;
-      }
-      const recording = new Audio.Recording();
-      await recording.prepareToRecordAsync(Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY);
-      await recording.startAsync();
-      setRecording(recording);
-    } catch (error) {
-      console.error('Failed to start recording', error);
-    }
-  };
-
-  const stopRecording = async () => {
-    console.log('Stopping recording..');
-    setRecording(undefined);
-    await recording.stopAndUnloadAsync();
-    const uri1 = recording.getURI(); // Get the URI of the recorded audio
-    console.log('Recording stopped and stored at', uri1);
-
-    // Convert the recorded audio file to base64
-    try {
-      const response = await fetch(uri1);
-      const audioBlob = await response.blob();
-      const reader = new FileReader();
-      await new Promise((resolve, reject) => {
-        reader.onload = () => resolve();
-        reader.onerror = reject;
-        reader.readAsDataURL(audioBlob);
-      });
-      const base64Audio = reader.result.split(',')[1];
-      setBase64Audio(base64Audio);
-    } catch (error) {
-      console.error('Error converting audio to base64:', error);
     }
   };
 
@@ -276,7 +239,7 @@ export default function HomeScreen() {
 
       setUploading(true);
 
-      await fetch(`http://192.168.43.160:3000/api/message`, {
+      await fetch(`http://172.17.21.15:3000/api/message`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -305,21 +268,39 @@ export default function HomeScreen() {
       { cancelable: false }
     );
   };
+  useEffect(() => {
+    // Assuming accepted users are fetched from some API or database
+    // Replace this with actual fetching logic
+    const mockAcceptedUsers = [
+      { id: 1, name: 'John Doe' },
+      { id: 2, name: 'Jane Doe' },
+      { id: 3, name: 'Alice' },
+      {id: 4, name: 'Alicee' },
+      {id: 5, name: 'Aliwce' },
+    ];
+    setAcceptedUsers(mockAcceptedUsers);
+  }, []);
+
+  const renderAcceptedUsers = () => {
+    if (acceptedUsers.length === 0) {
+      return <Text style={styles.noUsersText}>No one accepted till now</Text>;
+    }
+
+    return acceptedUsers.map(user => (
+      <TouchableOpacity key={user.id} style={styles.acceptedUserItem}>
+        <Text style={styles.acceptedUserName}>{user.name}</Text>
+      </TouchableOpacity>
+    ));
+  };
 
   return (
     <SafeAreaView style={styles.container}>
-      <LinearGradient
-        colors={[Colors.white, Colors.white]}
-        style={styles.gradientBackground}
-      >
-        <View style={styles.header}>
-          <LottieView
-            style={styles.lottie}
-            source={require('./animationWelcome.json')}
-            autoPlay
-            loop
-          />
-        </View>
+      <ScrollView>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <Image source={require('./p2.jpg')} style={styles.scrollImage} />
+          <Image source={require('./p2.jpg')} style={styles.scrollImage} />
+          <Image source={require('./p2.jpg')} style={styles.scrollImage} />
+        </ScrollView>
         <TextInput
           style={styles.textInput}
           placeholder="Type your message here..."
@@ -341,7 +322,7 @@ export default function HomeScreen() {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.button}
-            onPress={recording ? stopRecording : startRecording}
+            onPress={recording ? () => stopRecording(recording, setRecording, setBase64Audio) : () => startRecording(setRecording)}
           >
             <LinearGradient
               colors={[Colors.gradientStart, Colors.gradientEnd]}
@@ -351,13 +332,13 @@ export default function HomeScreen() {
                 name={recording ? "stop" : "microphone"}
                 size={22}
                 color="white"
-                style= {{padding:width * 0.03}}
+                style= {{padding: width * 0.03}}
               />
             </LinearGradient>
           </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={handleSend}>
             <LinearGradient
-              colors={[Colors.gradientStart, Colors.gradientEnd]}
+              colors={[Colors.gradientEnd, Colors.gradientEnd]}
               style={styles.buttonGradient}
             >
               <FontAwesome name="send" size={22} color={Colors.white} />
@@ -365,7 +346,12 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
         {uploading && <ActivityIndicator size="large" color="#FFA500" />}
-      </LinearGradient>
+      <View style={styles.acceptedUsersContainer}>
+        <ScrollView>
+          {renderAcceptedUsers()}
+        </ScrollView>
+      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -374,32 +360,28 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  gradientBackground: {
-    flex: 1,
-    padding: width * 0.04,
+gradientBackground:{
+  
+},
+  scrollView: {
+    marginBottom: height * 0.04,
   },
-  header: {
-    marginBottom: -height * 0.03,
-    marginTop: -height * 0.12,
-  },
-  lottie: {
-    width: width * 0.5,
-    height: height * 0.3,
+  scrollImage: {
+    width: width * 0.6,
+    height: height * 0.20,
+    borderRadius: width * 0.05,
+    marginHorizontal: width * 0.02,
+    marginVertical:width * 0.02
   },
   textInput: {
-    height: height * 0.25,
+    height: height * 0.1,
     borderColor: Colors.gradientStart,
     borderWidth: width * 0.01,
     borderRadius: width * 0.05,
     backgroundColor: '#fff',
     paddingHorizontal: width * 0.03,
     paddingVertical: width * 0.03,
-    marginBottom: height * 0.04,
-  },
-  image: {
-    width: '100%',
-    height: height * 0.25,
-    borderRadius: width * 0.05,
+    marginHorizontal: width * 0.02,
     marginBottom: height * 0.04,
   },
   buttonContainer: {
@@ -411,10 +393,34 @@ const styles = StyleSheet.create({
     marginHorizontal: width * 0.01,
   },
   buttonGradient: {
-    borderRadius: width * 0.09,
+    borderRadius: width * 0.03,
     padding: width * 0.03,
     alignItems: 'center',
   },
+  noUsersText: {
+    textAlign: 'center',
+    fontSize: 16,
+    color: Colors.black,
+    marginTop: 20,
+  },
+  acceptedUsersContainer: {
+    flex: 1,
+    backgroundColor: Colors.lightGray,
+    marginHorizontal:40,
+    paddingVertical: 10,
+    maxHeight:height * 0.3,
+    borderRadius:width * 0.05,
+    borderWidth:5,
+    borderColor:'pink'
+  },
+  acceptedUserItem: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.gray,
+  },
+  acceptedUserName: {
+    fontSize: 18,
+    color: Colors.black,
+  },
 });
-
-
