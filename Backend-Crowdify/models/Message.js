@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 
 const messageSchema = new mongoose.Schema({
-    Sender: String,
+    Sender: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     Content: String,
     ImageUri: String,
     AudioUri: String,
