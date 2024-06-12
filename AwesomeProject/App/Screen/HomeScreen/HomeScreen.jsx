@@ -50,7 +50,7 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
           longitude: location.coords.longitude,
         }
 
-        const response = await fetch(`http://172.17.21.15:3000/api/user/location`, {
+        const response = await fetch(`http://192.168.161.49:3000/api/user/location`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -168,7 +168,7 @@ export default function HomeScreen() {
 
       console.log("Data Collected", userData);
 
-      fetch(`http://172.17.21.15:3000/api/user`, {
+      fetch(`http://192.168.161.49:3000/api/user`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -239,7 +239,7 @@ export default function HomeScreen() {
 
       setUploading(true);
 
-      await fetch(`http://172.17.21.15:3000/api/message`, {
+      await fetch(`http://192.168.161.49:3000/api/message`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

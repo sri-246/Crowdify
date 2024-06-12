@@ -40,7 +40,7 @@ export default function NotificationsScreen() {
   const fetchReceivedMessages = async () => {
     try {
       const email = user.primaryEmailAddress.emailAddress;
-      const response = await fetch(`http://172.17.21.15:3000/api/fetchmessage/${email}`, {
+      const response = await fetch(`http://192.168.161.49:3000/api/fetchmessage/${email}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -65,7 +65,7 @@ export default function NotificationsScreen() {
 
   const handleAccept = async () => {
     try {
-      const response = await fetch('http://172.17.21.15:3000/api/accept', {
+      const response = await fetch('http://192.168.161.49:3000/api/accept', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
