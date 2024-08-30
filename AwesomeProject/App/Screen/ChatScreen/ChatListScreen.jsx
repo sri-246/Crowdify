@@ -24,7 +24,7 @@ const ChatListScreen = () => {
   const fetchChatList = async () => {
     try {
       const response = await fetch(
-        `http://192.168.161.49:3000/api/chats/${user.primaryEmailAddress.emailAddress}`
+        `http://192.168.43.16/api/chats/${user.primaryEmailAddress.emailAddress}`
       );
       const data = await response.json();
       setChats(data.chats);
